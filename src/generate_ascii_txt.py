@@ -37,7 +37,7 @@ with open(out_p, "a") as f:
         if not ret:
             break
         drawer.load_img(img=frame)
-        res = drawer.map_px()
+        res = drawer.get_colored_ascii()
 
         line = ""
         for l in res:

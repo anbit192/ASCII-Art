@@ -45,34 +45,54 @@ class ASCII_generate:
     def get_result(self):
         return self.final_chars
 
+def map_rgb_to_ansi(r, g, b):
+    """
+    Convert an rgb color to ansi color
+    """
+    # (r, g, b) = int(r), int(g), int(b)
+    if r == g & g == b:
+        if r < 8:
+            return 16
+        if r > 248:
+            return 230
+        return int(round(((r - 8) / 247) * 24) + 232)
+
+    ansi = 16 + (36 * round(r / 255 * 5)) + (6 * round(g / 255 * 5)) + round(b / 255 * 5)
+    return int(ansi)
 
 class DrawASCII:
-    def __init__(self, ASCII_CHARS, output_size, alpha=1.1, beta=-25):
+    def __init__(self, ASCII_CHARS, output_size):
 
         self.ASCII_CHARS = ASCII_CHARS
         self.output_size = output_size
-        self.alpha = alpha
-        self.beta = beta
 
     def load_img_by_path(self, img_path):
         # if (img_path):
         self.image = cv2.imread(img_path)
         self.image = cv2.resize(self.image, self.output_size)
-        self.image = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
         # self.image = cv2.convertScaleAbs(self.image, alpha=self.alpha, beta=self.beta)
 
     def load_img(self, img):
         self.image = img
         self.image = cv2.resize(self.image, self.output_size)
-        self.image = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
         # self.image = cv2.convertScaleAbs(self.image, alpha=self.alpha, beta=self.beta)
 
     def map_px(self):
         ratio = 255/(len(self.ASCII_CHARS))
-        converted = (self.image / ratio).astype(int)
+        converted = (self.image[:,:,0] / ratio).astype(int)
         converted = np.clip(converted, 0, len(self.ASCII_CHARS) - 1)
         return np.array(self.ASCII_CHARS)[converted]
 
+    
+    def color_px(self):
+        return np.array([f"\x1B[38;5;{map_rgb_to_ansi(r, g, b)}m" for b, g, r in self.image.reshape((-1, 3))]).reshape((self.output_size[::-1]))
+    
+    def get_colored_ascii(self):
+        res1 = self.color_px()
+        res2 = self.map_px()
+
+        concat = np.char.add(res1, res2)
+        return concat
 
 def main():
 
@@ -93,6 +113,7 @@ def main():
     drawer.load_img(im)
 
     res = drawer.map_px()
+    res = drawer.color_px()
 
     print(res.shape)
 

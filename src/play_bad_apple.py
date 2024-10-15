@@ -3,6 +3,7 @@ import time
 import pygame
 from dotenv import load_dotenv
 from pathlib import Path
+import sys
 
 load_dotenv()
 # Old version, running from bad-apple.txt
@@ -14,7 +15,7 @@ if __name__ == "__main__":
     txt_path = str(p / "bad-apple.txt")
     # print(Path(__file__).parent)
     pygame.mixer.init()
-    os.system("cls")
+    os.system("")
     pygame.mixer.music.load(music_path)
     pygame.mixer.music.set_volume(0.15)
     FPS = int(os.getenv("FPS"))
@@ -36,12 +37,13 @@ if __name__ == "__main__":
             # print(lines[j])
             print_lines = print_lines + lines[j] + "\n"
 
-        print(print_lines)
+        # print(print_lines)
+        sys.stdout.write("\033[H" + print_lines)
         time.sleep(1/FPS)
         # time.sleep(0.03332318)
         start = i
         # os.system("cls")
-        print("\r", end="", flush=True)
+        # print("\r", end="", flush=True)
 
     pygame.mixer.music.stop()
 
